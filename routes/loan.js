@@ -102,6 +102,7 @@ router.post("/search-member", (req, res) => {
 });
 
 router.get("/plot-chart", (req, res) => {
+  var result1 = [];
   const filterData = {
     year: req.query.a,
     varificationStatus: req.query.b,
@@ -115,7 +116,17 @@ router.get("/plot-chart", (req, res) => {
   })
     .sort({ loan_amnt: -1 })
     .limit(10)
-    .then(result => res.json(result))
+    .then(graphData => {
+      graphData.map(item => {
+        result1.push({
+          memberId: item.member_id,
+          loanAmount: item.loan_amnt,
+          annualIncome: item.annual_inc,
+          lastPayment: item.last_pymnt_amnt
+        });
+      });
+      res.json(result1);
+    })
     .catch(err => console.log(err));
 });
 

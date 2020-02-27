@@ -1,5 +1,6 @@
 import React, { PureComponent } from "react";
 import axios from "axios";
+import Animation from "./Animation";
 import {
   BarChart,
   Bar,
@@ -14,50 +15,7 @@ export default class Example extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      data: [
-        {
-          name: "Page A",
-          annualIncome: 4000,
-          lastPayment: 2400,
-          loanAmount: 2400
-        },
-        {
-          name: "Page B",
-          annualIncome: 3000,
-          lastPayment: 1398,
-          loanAmount: 2210
-        },
-        {
-          name: "Page C",
-          annualIncome: 2000,
-          lastPayment: 9800,
-          loanAmount: 2290
-        },
-        {
-          name: "Page D",
-          annualIncome: 2780,
-          lastPayment: 3908,
-          loanAmount: 2000
-        },
-        {
-          name: "Page E",
-          annualIncome: 1890,
-          lastPayment: 4800,
-          loanAmount: 2181
-        },
-        {
-          name: "Page F",
-          annualIncome: 2390,
-          lastPayment: 3800,
-          loanAmount: 2500
-        },
-        {
-          name: "Page G",
-          annualIncome: 3490,
-          lastPayment: 4300,
-          amt: 2100
-        }
-      ],
+      data: null,
       year: "2011",
       varificationStatus: "Verified",
       loanStatus: "Fully Paid"
@@ -80,6 +38,7 @@ export default class Example extends PureComponent {
         .value,
       selectedloanStatus: document.querySelector("#loanStatus").value
     };
+    this.setState({ ...this.state, data: null });
     axios
       .get(
         "/api/loan/plot-chart?a=" +
@@ -90,36 +49,25 @@ export default class Example extends PureComponent {
           inputs.selectedloanStatus +
           ""
       )
-      .then(result =>
-        this.setState(...this.state, {
-          data: {
-            memberId: result.data[0].member_id,
-            loanAmount: result.data[0].loan_amnt,
-            annualIncome: result.data[0].annual_inc,
-            lastPayment: result.data[0].last_pymnt_amnt
-          }
-        })
-      )
+      .then(result => {
+        console.log(result);
+        this.setState(this.setState({ ...this.state, data: result.data }));
+      })
       .catch(err => console.log(err));
   };
 
   componentDidMount() {
     axios
       .get("/api/loan/plot-chart?a=2013&b=Verified&c=Fully Paid")
-      .then(result =>
-        this.setState(...this.state, {
-          data: {
-            memberId: result.data.member_id,
-            loanAmount: result.data.loan_amnt,
-            annualIncome: result.data.annual_inc,
-            lastPayment: result.data.last_pymnt_amnt
-          }
-        })
-      )
+      .then(result => {
+        console.log(result);
+        this.setState({ ...this.state, data: result.data });
+      })
       .catch(err => console.log(err));
   }
 
   render() {
+    console.log(this.state.data);
     return (
       <div>
         <div className="row justify-content-center mt-5">
@@ -186,26 +134,30 @@ export default class Example extends PureComponent {
         </div>
 
         <div>
-          <BarChart
-            width={1080}
-            height={400}
-            data={this.state.data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="memberId" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="annualIncome" stackId="a" fill="#8884d8" />
-            <Bar dataKey="lastPayment" stackId="a" fill="#82ca9d" />
-            <Bar dataKey="loanAmount" fill="#ffc658" />
-          </BarChart>
+          {this.state.data ? (
+            <BarChart
+              width={1080}
+              height={400}
+              data={this.state.data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="memberId" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="annualIncome" stackId="a" fill="#8884d8" />
+              <Bar dataKey="lastPayment" stackId="a" fill="#82ca9d" />
+              <Bar dataKey="loanAmount" fill="#ffc658" />
+            </BarChart>
+          ) : (
+            <Animation />
+          )}
         </div>
       </div>
     );
